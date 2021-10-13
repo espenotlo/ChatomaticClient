@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox alignment="CENTER" spacing="20.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="norseninja.LoginController">
+   <children>
+      <Label text="Login View" />
+      <TextField fx:id="usernameTextField" promptText="username" />
+      <PasswordField fx:id="passwordField" promptText="password" />
+      <Label fx:id="statusLabel" textFill="RED" />
+      <Button fx:id="loginButton" onAction="#loginButtonClicked" text="Log in" />
+   </children>
+   <padding>
+      <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+   </padding>
+</VBox>

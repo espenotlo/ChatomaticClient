@@ -1,0 +1,11 @@
+# Default ignored files
+/shelf/
+/workspace.xml
+/vcs.xml
+/sonarlint
+/uiDesigner.xml
+/misc.xml
+/jarRepositories.xml
+/encodings.xml
+/compiler.xml
+/checkstyle-idea.xml
