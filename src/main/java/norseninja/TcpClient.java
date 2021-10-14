@@ -196,7 +196,7 @@ public class TcpClient {
 
     public boolean pingServer() {
         try {
-            return (this.clientSocket.getInetAddress().isReachable(100));
+            return (this.clientSocket.getInetAddress().isReachable(1000));
         } catch (IOException e) {
             return false;
         }

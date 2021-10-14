@@ -118,8 +118,6 @@ public class EditUserDialog extends Dialog<String[]> {
 
             gridPane.add(new Label("New password: "),0,2);
             gridPane.add(newPwField,1,2);
-
-            statusLabel.setText("password mode");
         }
 
         getDialogPane().setContent(gridPane);
