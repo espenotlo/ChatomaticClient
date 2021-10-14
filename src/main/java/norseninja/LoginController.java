@@ -17,6 +17,10 @@ public class LoginController {
 
     public void setTcpClient(TcpClient tcpClient) {
         this.tcpClient = tcpClient;
+        setup();
+    }
+
+    private void setup() {
         if (this.tcpClient.connectToServer()) {
             statusLabel.setTextFill(Color.GREEN);
             statusLabel.setText("Connected");
@@ -27,7 +31,7 @@ public class LoginController {
 
         this.usernameTextField.textProperty().addListener((observable, oldValue, newValue) -> {
             if (!newValue.equals(oldValue)) {
-               statusLabel.setText("");
+                statusLabel.setText("");
             }
         });
         this.passwordField.textProperty().addListener((observable, oldValue, newValue) -> {
@@ -55,7 +59,6 @@ public class LoginController {
                 }
             }
         } );
-
     }
 
     public TcpClient getTcpClient() {
@@ -79,4 +82,9 @@ public class LoginController {
             }
         }
     }
+
+    public void exitApplication() {
+        this.tcpClient.stop();
+    }
+
 }

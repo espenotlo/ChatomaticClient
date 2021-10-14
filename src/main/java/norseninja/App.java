@@ -18,22 +18,26 @@ public class App extends Application {
     private static TcpClient tcpClient;
     private static MainController mainController;
     private static LoginController loginController;
+    private static final String LOGIN_VIEW = "loginView";
+    private static final String MAIN_VIEW = "mainView";
+    private static String currentView = LOGIN_VIEW;
 
     @Override
     public void start(Stage stage) throws IOException {
         tcpClient = new TcpClient("83.243.162.56", 1301);
 
         stage.setOnCloseRequest(event -> stop());
+
         App.stage = stage;
 
-        scene = new Scene(loadFxml("loginView"));
-        stage.setTitle("Chatomatic Client");
+        scene = new Scene(loadFxml(LOGIN_VIEW));
         stage.setScene(scene);
         setSize(200,250);
         stage.show();
     }
 
     static void setRoot(String fxml) throws IOException {
+        currentView = fxml;
         scene.setRoot(loadFxml(fxml));
     }
 
@@ -46,35 +50,43 @@ public class App extends Application {
     private static Parent loadFxml(String fxml) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(App.class.getResource(fxml + ".fxml"));
         Parent parent = fxmlLoader.load();
-        if (fxml.equals("mainView")) {
+        if (fxml.equals(MAIN_VIEW)) {
             App.mainController = fxmlLoader.getController();
-            mainController.setTcpClient(App.tcpClient);
-        } else if (fxml.equals("loginView")) {
+            mainController.setTcpClient(tcpClient);
+            stage.setTitle("Chatomatic Client - Logged in as " + tcpClient.getMe());
+        } else if (fxml.equals(LOGIN_VIEW)) {
             App.loginController = fxmlLoader.getController();
-            loginController.setTcpClient(App.tcpClient);
+            loginController.setTcpClient(tcpClient);
         }
         return parent;
     }
 
     @Override
     public void stop() {
-        mainController.exitApplication();
+        if (currentView.equals(MAIN_VIEW)) {
+            mainController.exitApplication();
+        } else {
+            loginController.exitApplication();
+        }
+
+
+        System.exit(0);
     }
 
     static void logout() throws IOException {
         tcpClient.logout();
-        setRoot("loginView");
+        setRoot(LOGIN_VIEW);
         setSize(200, 250);
     }
 
     static void connectionError() throws IOException {
-        setRoot("loginView");
+        setRoot(LOGIN_VIEW);
         setSize(200,250);
         tcpClient.stop();
     }
 
     static void login() throws IOException {
-        scene.setRoot(loadFxml("mainView"));
+        setRoot(MAIN_VIEW);
         mainController.setTcpClient(loginController.getTcpClient());
         setSize(800,450);
     }

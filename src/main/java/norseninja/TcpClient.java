@@ -37,10 +37,17 @@ public class TcpClient {
         }
     }
 
-    public void stop() throws IOException {
-        this.outToServer.close();
-        this.inFromServer.close();
-        this.clientSocket.close();
+    public void stop() {
+        try {
+            if (this.inFromServer != null) {
+                this.outToServer.println("end");
+                this.outToServer.close();
+                this.inFromServer.close();
+                this.clientSocket.close();
+            }
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+        }
     }
 
     /**
@@ -59,6 +66,15 @@ public class TcpClient {
         }
     }
 
+    public String getMe() {
+        String response = null;
+         if (!this.clientSocket.isClosed()) {
+            this.outToServer.println("getme");
+            response = readResponseFromServer();
+        }
+        return response;
+    }
+
     public List<String> getActiveUsers() {
         ArrayList<String> activeUsers = null;
         this.outToServer.println("getactive");
@@ -69,6 +85,44 @@ public class TcpClient {
             activeUsers.remove(0);
         }
         return activeUsers;
+    }
+
+    public List<String> getAllUsers() {
+        ArrayList<String> allUsers = null;
+        if (!this.clientSocket.isClosed()) {
+            this.outToServer.println("getusers");
+            String response = readResponseFromServer();
+            if (null != response && (response.startsWith("ok"))) {
+                String[] array = response.split("/%");
+                allUsers = new ArrayList<>(Arrays.asList(array));
+                allUsers.remove(0);
+            }
+        }
+        return allUsers;
+    }
+
+    public boolean checkPassword(String password) {
+        if (!this.clientSocket.isClosed()) {
+            this.outToServer.println("password/%" + password);
+            return readResponseFromServer().startsWith("ok");
+        }
+        return false;
+    }
+
+    public boolean changeDisplayName(String name) {
+        if (!this.clientSocket.isClosed()) {
+            this.outToServer.println("editname/%" + name);
+            return readResponseFromServer().startsWith("ok");
+        }
+        return false;
+    }
+
+    public boolean changePassword(String oldPassword, String newPassword) {
+        if (!this.clientSocket.isClosed()) {
+            this.outToServer.println("editpw/%" + oldPassword + "/%" + newPassword);
+            return readResponseFromServer().startsWith("ok");
+        }
+        return false;
     }
 
     public List<Message> getMessages(LocalTime lastReceived) throws ConnectException {

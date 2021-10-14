@@ -7,6 +7,7 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.stage.Stage;
+import norseninja.Util.EditUserDialog;
 
 import java.io.IOException;
 import java.net.ConnectException;
@@ -14,6 +15,7 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class MainController {
     private TcpClient tcpClient;
@@ -28,16 +30,26 @@ public class MainController {
     public void setTcpClient(TcpClient tcpClient) {
         this.tcpClient = tcpClient;
         this.messages = new ArrayList<>();
+        setup();
         run();
+    }
+
+    public void setup() {
         inputField.setOnKeyPressed( event -> {
             if( event.getCode() == KeyCode.ENTER ) {
                 sendMessageButtonClicked();
             }
         });
+        inputField.requestFocus();
     }
 
     private void loadActiveRecipients() {
         userBox.getItems().setAll(this.tcpClient.getActiveUsers());
+        userBox.getSelectionModel().selectFirst();
+    }
+
+    private void loadAllRecipients() {
+        userBox.getItems().setAll(this.tcpClient.getAllUsers());
         userBox.getSelectionModel().selectFirst();
     }
 
@@ -56,6 +68,35 @@ public class MainController {
     }
 
     @FXML
+    private void editDisplayNameButtonClicked() {
+        EditUserDialog dialog = new EditUserDialog(tcpClient, EditUserDialog.Mode.NAME);
+        Optional<String[]> result = dialog.showAndWait();
+        if (result.isPresent()) {
+            if (this.tcpClient.changeDisplayName(result.get()[0])) {
+                statusLabel.setText("Name changed successfully");
+                Stage stage = (Stage) statusLabel.getScene().getWindow();
+                stage.setTitle("Chatomatic Client - Logged in as " + result.get()[0]);
+            } else {
+                statusLabel.setText("Error: name change failed");
+            }
+        }
+
+    }
+
+    @FXML
+    private void changePasswordButtonClicked() {
+        EditUserDialog dialog = new EditUserDialog(tcpClient, EditUserDialog.Mode.PASSWORD);
+        Optional<String[]> result = dialog.showAndWait();
+        if (result.isPresent() && result.get().length == 2) {
+            if (this.tcpClient.changePassword(result.get()[0], result.get()[1])) {
+                statusLabel.setText("Password updated successfully");
+            } else {
+                statusLabel.setText("Error: password change failed");
+            }
+        }
+    }
+
+    @FXML
     public void logoutButtonClicked() throws IOException {
         running = false;
         App.logout();
@@ -66,7 +107,6 @@ public class MainController {
         if (tcpClient.logout()) {
             running = false;
         }
-        System.exit(0);
     }
 
     private void connectionError() {
@@ -81,8 +121,12 @@ public class MainController {
     private void run() {
         if (!running) {
             running = true;
-            userBox.focusedProperty().addListener(e -> loadActiveRecipients());
-            loadActiveRecipients();
+            userBox.focusedProperty().addListener(e -> {
+                if (userBox.isFocused()) {
+                    loadAllRecipients();
+                }
+            });
+            loadAllRecipients();
             Runnable taskToBeExecutedOnAnotherThread = () -> {
                 long threadId = Thread.currentThread().getId();
                 System.out.println("Fetching messages on thread #" + threadId);
