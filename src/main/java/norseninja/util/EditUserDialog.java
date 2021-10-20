@@ -1,18 +1,20 @@
-package norseninja.Util;
+package norseninja.util;
 
+import java.util.HashMap;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
-import javafx.scene.control.*;
+import javafx.scene.control.ButtonBar;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.Label;
+import javafx.scene.control.PasswordField;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 import norseninja.TcpClient;
-
-import java.util.HashMap;
 
 public class EditUserDialog extends Dialog<String[]> {
     private final Mode mode;
@@ -25,6 +27,11 @@ public class EditUserDialog extends Dialog<String[]> {
         NAME, PASSWORD
     }
 
+    /**
+     * A Dialog to handle user management.
+     * @param tcpClient unfortunate tcpClient. Should be handled by caller.
+     * @param mode the mode of the client. Either NAME or PASSWORD.
+     */
     public EditUserDialog(TcpClient tcpClient, Mode mode) {
         super();
         this.mode = mode;
@@ -35,6 +42,9 @@ public class EditUserDialog extends Dialog<String[]> {
         showContent();
     }
 
+    /**
+     * Constructs display content.
+     */
     private void showContent() {
         Stage stage = (Stage) getDialogPane().getScene().getWindow();
 
@@ -63,7 +73,6 @@ public class EditUserDialog extends Dialog<String[]> {
         if (this.mode.equals(Mode.NAME)) {
             stage.setTitle("Change Display Name");
 
-            Label nameLabel = new Label("Display name: ");
             nameField.setPromptText("Display name");
             nameField.setText(this.name);
             nameField.textProperty().addListener((observable, oldValue, newValue) -> {
@@ -82,7 +91,7 @@ public class EditUserDialog extends Dialog<String[]> {
                     saveButton.setDisable(false);
                 }
             });
-            gridPane.add(nameLabel,0,1);
+            gridPane.add(new Label("Display name: "),0,1);
             gridPane.add(nameField,1,1);
         } else if (this.mode.equals(Mode.PASSWORD)) {
             stage.setTitle("Change Password");

@@ -1,5 +1,11 @@
 package norseninja;
 
+import java.io.IOException;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import javafx.fxml.FXML;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
@@ -7,15 +13,7 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.stage.Stage;
-import norseninja.Util.EditUserDialog;
-
-import java.io.IOException;
-import java.net.ConnectException;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import norseninja.util.EditUserDialog;
 
 public class MainController {
     private TcpClient tcpClient;
@@ -27,6 +25,10 @@ public class MainController {
     @FXML Label statusLabel;
     @FXML ChoiceBox<String> userBox;
 
+    /**
+     * Set this class' tcpClient.
+     * @param tcpClient TcpClient
+     */
     public void setTcpClient(TcpClient tcpClient) {
         this.tcpClient = tcpClient;
         this.messages = new ArrayList<>();
@@ -34,25 +36,29 @@ public class MainController {
         run();
     }
 
+    /**
+     * Sets the keyEventListener for the inputField, and gives it focus.
+     */
     public void setup() {
-        inputField.setOnKeyPressed( event -> {
-            if( event.getCode() == KeyCode.ENTER ) {
+        inputField.setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.ENTER) {
                 sendMessageButtonClicked();
             }
         });
         inputField.requestFocus();
     }
 
-    private void loadActiveRecipients() {
-        userBox.getItems().setAll(this.tcpClient.getActiveUsers());
-        userBox.getSelectionModel().selectFirst();
-    }
-
+    /**
+     * Loads all recipients.
+     */
     private void loadAllRecipients() {
         userBox.getItems().setAll(this.tcpClient.getAllUsers());
         userBox.getSelectionModel().selectFirst();
     }
 
+    /**
+     * Sends a message containing the text from the inputField to selected user.
+     */
     @FXML
     private void sendMessageButtonClicked() {
         String messageText = inputField.getText();
@@ -96,12 +102,20 @@ public class MainController {
         }
     }
 
+    /**
+     * Logs the user out and returns to the login screen.
+     *
+     * @throws IOException if login screen couldn't be loaded.
+     */
     @FXML
     public void logoutButtonClicked() throws IOException {
         running = false;
         App.logout();
     }
 
+    /**
+     * Logs the user out and exits the application.
+     */
     @FXML
     public void exitApplication() {
         if (tcpClient.logout()) {
@@ -109,6 +123,9 @@ public class MainController {
         }
     }
 
+    /**
+     * Returns the user to the login screen.
+     */
     private void connectionError() {
         this.running = false;
         try {
@@ -118,6 +135,10 @@ public class MainController {
         }
     }
 
+    /**
+     * Runs a background thread to continuously fetch and display new messages,
+     * and confirm continued server connection.
+     */
     private void run() {
         if (!running) {
             running = true;
@@ -128,18 +149,14 @@ public class MainController {
             });
             loadAllRecipients();
             Runnable taskToBeExecutedOnAnotherThread = () -> {
-                long threadId = Thread.currentThread().getId();
-                System.out.println("Fetching messages on thread #" + threadId);
                 while (running) {
                     getMessages();
                     try {
                         Thread.sleep(1000);
                     } catch (InterruptedException e) {
-                        System.out.println("Thread sleep interrupted... Oh, well...");
                         Thread.currentThread().interrupt();
                     }
                 }
-                System.out.println("Done fetching messages on thread #" + threadId);
             };
             Thread t = new Thread(taskToBeExecutedOnAnotherThread);
             t.setDaemon(true);
@@ -147,24 +164,31 @@ public class MainController {
         }
     }
 
+    /**
+     * Fetches and displays new messages.
+     */
     private void getMessages() {
-        try {
-            List<Message> newMessages;
-            if (this.tcpClient.pingServer()) {
-                if (this.messages.isEmpty()) {
-                    newMessages = this.tcpClient.getMessages(null);
-                } else {
-                    newMessages = this.tcpClient.getMessages(this.messages.get(this.messages.size() - 1).getTimeStamp());
-                }
-                newMessages.forEach(m -> {
-                    LocalTime t = m.getTimeStamp();
-                    textArea.appendText("<" + t.format(DateTimeFormatter.ofPattern("kk:mm:ss")) + ": from " + m.getFromUser() + ", to " + m.getToUser() + "> " + m.getMessageText() + "\n");
-                    this.messages.add(m);
-                });
+        List<Message> newMessages;
+        if (this.tcpClient.checkConnection()) {
+            if (this.messages.isEmpty()) {
+                newMessages = this.tcpClient.getMessages(null);
             } else {
-                connectionError();
+                newMessages = this.tcpClient
+                        .getMessages(this.messages
+                                .get(this.messages.size() - 1)
+                                .getTimeStamp());
             }
-        } catch (ConnectException e) {
+            newMessages.forEach(m -> {
+                LocalTime t = m.getTimeStamp();
+                textArea.appendText("<"
+                        + t.format(DateTimeFormatter.ofPattern("kk:mm:ss"))
+                        + ": from " + m.getFromUser() + ", to "
+                        + m.getToUser() + "> "
+                        + m.getMessageText()
+                        + "\n");
+                this.messages.add(m);
+            });
+        } else {
             connectionError();
         }
     }

@@ -1,15 +1,14 @@
 package norseninja;
 
+import java.io.IOException;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
-import java.io.IOException;
-
 /**
- * JavaFX App
+ * JavaFX App.
  */
 public class App extends Application {
 
@@ -32,7 +31,7 @@ public class App extends Application {
 
         scene = new Scene(loadFxml(LOGIN_VIEW));
         stage.setScene(scene);
-        setSize(200,250);
+        setSize(200,260);
         stage.show();
     }
 
@@ -76,12 +75,12 @@ public class App extends Application {
     static void logout() throws IOException {
         tcpClient.logout();
         setRoot(LOGIN_VIEW);
-        setSize(200, 250);
+        setSize(200,260);
     }
 
     static void connectionError() throws IOException {
         setRoot(LOGIN_VIEW);
-        setSize(200,250);
+        setSize(200,260);
         tcpClient.stop();
     }
 
@@ -91,6 +90,10 @@ public class App extends Application {
         setSize(800,450);
     }
 
+    /**
+     * Main run method.
+     * @param args arguments.
+     */
     public static void main(String[] args) {
         launch();
     }

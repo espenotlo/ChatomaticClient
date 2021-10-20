@@ -3,11 +3,11 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>norseninja</groupId>
     <artifactId>Chatomatic</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>2.0-SNAPSHOT</version>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
+        <maven.compiler.source>15.0.1</maven.compiler.source>
+        <maven.compiler.target>15.0.1</maven.compiler.target>
     </properties>
     <dependencies>
         <dependency>
@@ -28,7 +28,7 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.8.0</version>
                 <configuration>
-                    <release>11</release>
+                    <release>15</release>
                 </configuration>
             </plugin>
             <plugin>
