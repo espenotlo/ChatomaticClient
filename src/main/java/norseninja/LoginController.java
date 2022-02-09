@@ -24,6 +24,7 @@ public class LoginController {
     private boolean running = true;
     private boolean connected = false;
     private EventHandler<KeyEvent> handler;
+    private int one = 1;
 
     /**
      * Set this class' tcpClient.
